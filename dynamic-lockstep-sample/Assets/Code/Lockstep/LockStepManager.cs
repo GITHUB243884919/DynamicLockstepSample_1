@@ -332,13 +332,15 @@ public class LockStepManager : MonoBehaviour {
 		
 		//Rotate the order the player actions are processed so there is no advantage given to
 		//any one player
-		for(int i=playerIDToProcessFirst; i< pendingActions.CurrentActions.Length; i++) {
+		for(int i=playerIDToProcessFirst; i< pendingActions.CurrentActions.Length; i++)
+        {
 			pendingActions.CurrentActions[i].ProcessAction();
 			runtimeAverage.Add (pendingActions.CurrentActions[i].RuntimeAverage, i);
 			networkAverage.Add (pendingActions.CurrentActions[i].NetworkAverage, i);
 		}
 		
-		for(int i=0; i<playerIDToProcessFirst; i++) {
+		for(int i=0; i<playerIDToProcessFirst; i++) 
+        {
 			pendingActions.CurrentActions[i].ProcessAction();
 			runtimeAverage.Add (pendingActions.CurrentActions[i].RuntimeAverage, i);
 			networkAverage.Add (pendingActions.CurrentActions[i].NetworkAverage, i);

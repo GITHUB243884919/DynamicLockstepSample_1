@@ -19,25 +19,33 @@
 //LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 //THE SOFTWARE.
-public class RollingAverage {
+public class RollingAverage 
+{
 	
 	public int[] currentValues; //used only for logging
 	
 	private int[] playerAverages;
-	public RollingAverage(int numofPlayers, int initValue) {
+	public RollingAverage(int numofPlayers, int initValue) 
+    {
 		playerAverages = new int[numofPlayers];
 		currentValues = new int[numofPlayers];
-		for(int i=0; i<numofPlayers; i++) {
+		for(int i=0; i<numofPlayers; i++) 
+        {
 			playerAverages[i] = initValue;
 			currentValues[i] = initValue;
 		}
 	}
 	
-	public void Add(int newValue, int playerID) {
-		if(newValue > playerAverages[playerID]) {
-			//rise quickly
+	public void Add(int newValue, int playerID) 
+    {
+		if(newValue > playerAverages[playerID]) 
+        {
+			//rise quickly160329
+
 			playerAverages[playerID] = newValue;
-		} else {
+		} 
+        else 
+        {
 			//slowly fall down
 			playerAverages[playerID] = (playerAverages[playerID] * (9) + newValue * (1)) / 10;
 		}
@@ -45,10 +53,13 @@ public class RollingAverage {
 		currentValues[playerID] = newValue;
 	}
 	
-	public int GetMax() {
+	public int GetMax() 
+    {
 		int max = int.MinValue;
-		foreach(int average in playerAverages) {
-			if(average > max) {
+		foreach(int average in playerAverages) 
+        {
+			if(average > max) 
+            {
 				max = average;
 			}
 		}
