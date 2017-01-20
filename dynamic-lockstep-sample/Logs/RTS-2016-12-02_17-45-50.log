@@ -1,0 +1,5 @@
+2016-12-02 17:45:52,722 [1] DEBUG NetworkManager [(null)] - Starting Server
+2016-12-02 17:45:52,775 [1] DEBUG NetworkManager [(null)] - startServer called
+2016-12-02 17:45:53,038 [1] DEBUG NetworkManager [(null)] - Server initialized
+2016-12-02 17:45:53,044 [1] DEBUG NetworkManager [(null)] - Expected player count : 2
+2016-12-02 17:46:05,741 [1] DEBUG NetworkManager [(null)] - Local server connection disconnected

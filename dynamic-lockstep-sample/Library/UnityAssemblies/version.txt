@@ -1,0 +1,4 @@
+5.3.4f1:2.0.0.0
+StandaloneWindows
+D:/Unity5.3.4/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll
+D:/Unity5.3.4/Editor/Data/UnityExtensions/Unity/Networking/UnityEngine.Networking.dll

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+	<log4net>
+		<root>
+			<level value="DEBUG" />
+			<appender-ref ref="FileAppender" />
+			<appender-ref ref="Unity3DAppender" />
+		</root>
+		<appender name="FileAppender" type="CWDFileAppender">
+    		<file type="log4net.Util.PatternString" value="RTS-%date{yyyy-MM-dd_HH-mm-ss}.log" />
+    		<appendToFile value="true" />
+    		<layout type="log4net.Layout.PatternLayout">
+        		<conversionPattern value="%date [%thread] %-5level %logger [%property{NDC}] - %message%newline" />
+    		</layout>
+		</appender>
+		<appender name="Unity3DAppender" type="Unity3DConsoleAppender">
+		  <layout type="log4net.Layout.PatternLayout">
+        		<conversionPattern value="%date [%thread] %-5level %logger [%property{NDC}] - %message%newline" />
+    		</layout>
+		</appender>
+	</log4net>	
+</configuration>
