@@ -31,17 +31,24 @@ public class LockStepManager : MonoBehaviour {
 	
 	private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 	
-	#region Public Variables
+
 	public static readonly int FirstLockStepTurnID = 0;
 	
 	public static LockStepManager Instance;
-	
+
+    //fzy begin
+    //LockStepTurnID是回合次数记次，只增加不减少
+    //fzy end
 	public int LockStepTurnID = FirstLockStepTurnID;
-	
+    //fzy begin
+    //GameFrame 是在当前LockStepTurnID下的帧数记次
+    //当(GameFrame == GameFramesPerLockstepTurn) 时GameFrame重设置为0
+    //fzy end
+    private int GameFrame = 0; //Current Game Frame number in the currect lockstep turn
 	public int numberOfPlayers;
-	#endregion
+
 	
-	#region Private Variables
+
 	private PendingActions pendingActions;
 	private ConfirmedActions confirmedActions;
 	
@@ -70,9 +77,7 @@ public class LockStepManager : MonoBehaviour {
 	
 	private int playerIDToProcessFirst = 0; //used to rotate what player's action gets processed first
 	
-	private int GameFrame = 0; //Current Game Frame number in the currect lockstep turn
 	private int AccumilatedTime = 0; //the accumilated time in Milliseconds that have passed since the last time GameFrame was called
-	#endregion
 	
 	// Use this for initialization
 	void Start () {
@@ -212,14 +217,27 @@ public class LockStepManager : MonoBehaviour {
 	private bool LockStepTurn() 
     {
 		log.Debug ("LockStepTurnID: " + LockStepTurnID);
+        //fzy begin
+        //检查两点
+        //1.我们已经收到了所有客户端的下一轮动作了吗？
+        //2.每个客户端都确认得到我们的动作了吗？
+        //fzy end
 		//Check if we can proceed with the next turn
 		bool nextTurn = NextTurn();
 		if(nextTurn) 
         {
+            //fzy begin
+            //向其他服务器/客户端发送下本客户端下一轮的动作
+            //fzy end
 			SendPendingAction ();
 			//the first and second lockstep turn will not be ready to process yet
 			if(LockStepTurnID >= FirstLockStepTurnID + 3) 
             {
+                //fzy begin
+                //处理Action，这些Action都是其他客户端确认过的吗？
+                //从道理上讲，这些Action中有本客户端控制的玩家，也有其他客户端控制的玩家
+                //比如说，可能本客户端的玩家移动，也有同步的其他客户端的玩家移动
+                //fzy end
 				ProcessActions ();
 			}
 		}
@@ -244,12 +262,21 @@ public class LockStepManager : MonoBehaviour {
 		//		log.Debug ("    allPlayerNextNextActionsCount - " + pendingActions.NextNextActions.Count);
 		//		log.Debug ("    allPlayerNextNextNextActionsCount - " + pendingActions.NextNextNextActions.Count);
 		
+        //fzy begin
+        //检查两点
+        //1.我们已经收到了所有客户端的下一轮动作了吗？
+        //2.每个客户端都确认得到我们的动作了吗？
+        //fzy end
 		if(confirmedActions.ReadyForNextTurn()) 
         {
 			if(pendingActions.ReadyForNextTurn()) 
             {
+                //fzy begin
+                //LockStepTurnID是回合次数记次，只增加不减少
+                //fzy end
 				//increment the turn ID
-				LockStepTurnID++;
+                LockStepTurnID++;
+
 				//move the confirmed actions to next turn
 				confirmedActions.NextTurn();
 				//move the pending actions to this turn
@@ -448,30 +475,47 @@ public class LockStepManager : MonoBehaviour {
 				return;
 			}
 		}
-		
+
+        //fzy begin 
+        //gameTurnSW 是c#的Stopwatch类，用于计算运行时间。
+        //Start()和Stop()配对Reset()重置。ElapsedMilliseconds是时间
+        //fzy end
 		//start the stop watch to determine game frame runtime performance
-        // gameTurnSW 是c#的Stopwatch类，用于计算运行时间。
-        // Start()和Stop()配对Reset()重置。ElapsedMilliseconds是时间
 		gameTurnSW.Start();
-		
+
+
+        //fzy begin
+        //IHasGameFrame相当于游戏中所有需要Update的组件，GameFrameTurn接口相当于Update，
+        //int gameFramesPerSecond 作为参数带入相当于Time.deltaTime
+        //这个Finished怎么用？
+        //fzy end
 		//update game
 		//SceneManager.Manager.TwoDPhysics.Update (GameFramesPerSecond);
-		
 		List<IHasGameFrame> finished = new List<IHasGameFrame>();
 		foreach(IHasGameFrame obj in SceneManager.Manager.GameFrameObjects) 
         {
 			obj.GameFrameTurn(GameFramesPerSecond);
+            //fzy begin
+            //完成了的放入List待移除
+            //fzy end
 			if(obj.Finished) 
             {
 				finished.Add (obj);
 			}
 		}
-		
+
+        //fzy begin
+        //完成了的移除
+        //fzy end
 		foreach(IHasGameFrame obj in finished) 
         {
 			SceneManager.Manager.GameFrameObjects.Remove (obj);
 		}
 		
+        //fzy begin
+        //按前面GameFrame定义的注释理解。
+        //Current Game Frame number in the currect lockstep turn
+        //fzy end
 		GameFrame++;
 		if(GameFrame == GameFramesPerLockstepTurn) 
         {
