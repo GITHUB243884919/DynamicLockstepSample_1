@@ -26,6 +26,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
+/// <summary>
+/// fzy begin
+/// 详见http://jjyy.guru/unity3d-lock-step-part-1
+/// fzy end
+/// </summary>
 [RequireComponent(typeof(NetworkView))]
 public class LockStepManager : MonoBehaviour {
 	
@@ -67,12 +72,37 @@ public class LockStepManager : MonoBehaviour {
 	RollingAverage runtimeAverage;
 	long currentGameFrameRuntime; //used to find the maximum gameframe runtime in the current lockstep turn
 	private Stopwatch gameTurnSW;
+    //fzy begin
+    //initialLockStepTurnLength 初始化单lockstep回合时长，毫秒,
+    //也就是一次lockstep的时长，帧同步回合时长。
+    //fzy end
 	private int initialLockStepTurnLength = 200; //in Milliseconds
+    //fzy begin
+    //initialGameFrameTurnLength 初始化单个游戏帧回合时长，毫秒
+    //这个并不是Mono里的一次Update的帧，实际上它会而是在一次帧同步回合中会执行若干次游戏帧回合
+    //而游戏帧回合中会执行多个“Update”，在这里是持有的多个 IHasGameFrame对象的GameFrameTurn函数
+    //fzy end
 	private int initialGameFrameTurnLength = 50; //in Milliseconds
+    //fzy begin
+    //以下两个LockstepTurnLength，GameFrameTurnLength 对应上面的带initial的两个变量，这两个值是
+    //浮动的，需要再看看http://jjyy.guru/unity3d-lock-step-part-2
+    //fzy end
 	private int LockstepTurnLength;
 	private int GameFrameTurnLength;
+    //fzy begin
+    //GameFramesPerLockstepTurn是一个lockstep回合中，有多少个游戏帧回合
+    //在UpdateGameFrameRate函数中被这样算
+    //GameFramesPerLockstepTurn = LockstepTurnLength / GameFrameTurnLength;
+    //UpdateGameFrameRate函数需要仔细看看，好多关于长度，时长等在这里处理
+    //fzy end
 	private int GameFramesPerLockstepTurn;
 	private int LockstepsPerSecond;
+    //fzy begin
+    //GameFramesPerSecond  先简单理解成类似Time.deltaTime
+    //这个值怎么来的需要好好看看。因为游戏实际的代码主要被IHasGameFrame对象的GameFrameTurn函数驱动，
+    //上面说过，这个函数相当于Update，这个值相当于Time.deltaTime。整个lockstep机制中，一个重要的环节
+    //就是要计算出一个正确的Time.deltaTime
+    //fzy end
 	private int GameFramesPerSecond;
 	
 	private int playerIDToProcessFirst = 0; //used to rotate what player's action gets processed first
