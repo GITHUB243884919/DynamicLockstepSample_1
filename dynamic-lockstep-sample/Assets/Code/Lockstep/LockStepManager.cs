@@ -264,7 +264,7 @@ public class LockStepManager : MonoBehaviour {
 			if(LockStepTurnID >= FirstLockStepTurnID + 3) 
             {
                 //fzy begin
-                //处理Action，这些Action都是其他客户端确认过的吗？
+                //处理Action，这些Action都是其他客户端确认过的吗？貌似上面的bool nextTurn = NextTurn();可以判断
                 //从道理上讲，这些Action中有本客户端控制的玩家，也有其他客户端控制的玩家
                 //比如说，可能本客户端的玩家移动，也有同步的其他客户端的玩家移动
                 //fzy end
@@ -387,6 +387,9 @@ public class LockStepManager : MonoBehaviour {
 		//process action should be considered in runtime performance
 		gameTurnSW.Start ();
 		
+        //fzy begin
+        //这里为什么要pendingActions拆分成两段执行
+        //fzy end
 		//Rotate the order the player actions are processed so there is no advantage given to
 		//any one player
 		for(int i=playerIDToProcessFirst; 
@@ -475,7 +478,10 @@ public class LockStepManager : MonoBehaviour {
 		}
 		
 		LockstepsPerSecond = (1000 / LockstepTurnLength);
-		if(LockstepsPerSecond == 0) { LockstepsPerSecond = 1; } //minimum per second
+		if(LockstepsPerSecond == 0) 
+        {
+            LockstepsPerSecond = 1; //minimum per second
+        } 
 		
 		GameFramesPerSecond = LockstepsPerSecond * GameFramesPerLockstepTurn;		
 	}
@@ -544,6 +550,7 @@ public class LockStepManager : MonoBehaviour {
 		
         //fzy begin
         //按前面GameFrame定义的注释理解。
+        //完成了一轮所有IHasGameFrame的GameFrameTurn，那么GameFrame就加1
         //Current Game Frame number in the currect lockstep turn
         //fzy end
 		GameFrame++;
@@ -554,6 +561,13 @@ public class LockStepManager : MonoBehaviour {
 		
 		//stop the stop watch, the gameframe turn is over
 		gameTurnSW.Stop ();
+
+        //fzy begin
+        //gameTurnSW记录了本轮执行所有IHasGameFrame的GameFrameTurn时间。
+        //runtime = gameTurnSW + Time.deltaTime 就成了本轮真实的时间
+        //然后把最大的runtime记录到currentGameFrameRuntime。
+        //这样currentGameFrameRuntime 就成了最长的游戏帧的时间
+        //fzy end
 		//update only if it's larger - we will use the game frame that took the longest in this lockstep turn
         //deltaTime is in secounds, convert to milliseconds
 		long runtime = Convert.ToInt32 ((Time.deltaTime * 1000)) + gameTurnSW.ElapsedMilliseconds;
@@ -561,6 +575,7 @@ public class LockStepManager : MonoBehaviour {
         {
 			currentGameFrameRuntime = runtime;
 		}
+
 		//clear for the next frame
 		gameTurnSW.Reset();
 	}
