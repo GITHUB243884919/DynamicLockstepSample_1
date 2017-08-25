@@ -89,6 +89,7 @@ public class LockStepManager : MonoBehaviour {
     //fzy end
 	private int LockstepTurnLength;
 	private int GameFrameTurnLength;
+
     //fzy begin
     //GameFramesPerLockstepTurn是一个lockstep回合中，有多少个游戏帧回合
     //在UpdateGameFrameRate函数中被这样算
@@ -96,12 +97,19 @@ public class LockStepManager : MonoBehaviour {
     //UpdateGameFrameRate函数需要仔细看看，好多关于长度，时长等在这里处理
     //fzy end
 	private int GameFramesPerLockstepTurn;
-	private int LockstepsPerSecond;
+
     //fzy begin
-    //GameFramesPerSecond  先简单理解成类似Time.deltaTime
-    //这个值怎么来的需要好好看看。因为游戏实际的代码主要被IHasGameFrame对象的GameFrameTurn函数驱动，
+    //LockstepsPerSecond 是每秒内lockstep回合的次数
+    //fzy end
+	private int LockstepsPerSecond;
+
+    //fzy begin
+    //GameFramesPerSecond 是每秒内游戏回合的次数
+    //GameFramesPerSecond 可以理解成类似Time.deltaTime，在lockstep中IHasGameFrame对象的GameFrameTurn相当于Update。
+    //因此GameFrameTurn也需要要一个Time.deltaTime，但显然又不能用Time.deltaTime。
+    //这个值怎么来的需要好好看看。因为游戏中很多代码是要被IHasGameFrame对象的GameFrameTurn函数驱动，
     //上面说过，这个函数相当于Update，这个值相当于Time.deltaTime。整个lockstep机制中，一个重要的环节
-    //就是要计算出一个正确的Time.deltaTime
+    //就是要计算出基于lockstep的Time.deltaTime
     //fzy end
 	private int GameFramesPerSecond;
 	
@@ -477,12 +485,19 @@ public class LockStepManager : MonoBehaviour {
 			LockstepTurnLength = GameFramesPerLockstepTurn * GameFrameTurnLength;
 		}
 		
+        //fzy begin
+        //LockstepsPerSecond 是每秒内lockstep回合的次数
+        //LockstepTurnLength的单位是毫秒，所以得用1000去除以LockstepTurnLength
+        //fzy end
 		LockstepsPerSecond = (1000 / LockstepTurnLength);
 		if(LockstepsPerSecond == 0) 
         {
             LockstepsPerSecond = 1; //minimum per second
         } 
 		
+        //fzy begin
+        //GameFramesPerSecond 是每秒内游戏回合的次数
+        //fzy end
 		GameFramesPerSecond = LockstepsPerSecond * GameFramesPerLockstepTurn;		
 	}
 	

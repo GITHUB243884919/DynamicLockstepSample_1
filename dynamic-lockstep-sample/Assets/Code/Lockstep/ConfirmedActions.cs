@@ -55,15 +55,18 @@ public class ConfirmedActions
 		priorSW = new Stopwatch();
 	}
 	
-	public int GetPriorTime() {
+	public int GetPriorTime() 
+    {
 		return ((int)priorSW.ElapsedMilliseconds);
 	}
 	
-	public void StartTimer() {
+	public void StartTimer() 
+    {
 		currentSW.Start ();
 	}
 	
-	public void NextTurn() {
+	public void NextTurn() 
+    {
 		//clear prior actions
 		ResetArray(confirmedPrior);
 		
@@ -82,63 +85,82 @@ public class ConfirmedActions
 		currentSW.Reset ();
 	}
 	
-	public void ConfirmAction(int confirmingPlayerID, int currentLockStepTurn, int confirmedActionLockStepTurn) {
-		if(confirmedActionLockStepTurn == currentLockStepTurn) {
+	public void ConfirmAction(int confirmingPlayerID, int currentLockStepTurn, int confirmedActionLockStepTurn) 
+    {
+		if(confirmedActionLockStepTurn == currentLockStepTurn) 
+        {
 			//if current turn, add to the current Turn Confirmation
 			confirmedCurrent[confirmingPlayerID] = true;
 			confirmedCurrentCount++;
 			//if we recieved the last confirmation, stop timer
 			//this gives us the length of the longest roundtrip message
-			if(confirmedCurrentCount == lsm.numberOfPlayers) {
+			if(confirmedCurrentCount == lsm.numberOfPlayers) 
+            {
 				currentSW.Stop ();
 			}
-		} else if(confirmedActionLockStepTurn == currentLockStepTurn -1) {
+		} 
+        else if(confirmedActionLockStepTurn == currentLockStepTurn -1) 
+        {
 			//if confirmation for prior turn, add to the prior turn confirmation
 			confirmedPrior[confirmingPlayerID] = true;
 			confirmedPriorCount++;
 			//if we recieved the last confirmation, stop timer
 			//this gives us the length of the longest roundtrip message
-			if(confirmedPriorCount == lsm.numberOfPlayers) {
+			if(confirmedPriorCount == lsm.numberOfPlayers) 
+            {
 				priorSW.Stop ();
 			}
-		} else {
+		} 
+        else 
+        {
 			//TODO: Error Handling
 			log.Debug ("WARNING!!!! Unexpected lockstepID Confirmed : " + confirmedActionLockStepTurn + " from player: " + confirmingPlayerID);
 		}
 	}
 	
-	public bool ReadyForNextTurn() {
+	public bool ReadyForNextTurn() 
+    {
 		//check that the action that is going to be processed has been confirmed
-		if(confirmedPriorCount == lsm.numberOfPlayers) {
+		if(confirmedPriorCount == lsm.numberOfPlayers) 
+        {
 			return true;
 		}
 		//if 2nd turn, check that the 1st turns action has been confirmed
-		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID + 1) {
+		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID + 1) 
+        {
 			return confirmedCurrentCount == lsm.numberOfPlayers;
 		}
 		//no action has been sent out prior to the first turn
-		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID) {
+		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID) 
+        {
 			return true;
 		}
 		//if none of the conditions have been met, return false
 		return false;
 	}
 	
-	public int[] WhosNotConfirmed() {
+	public int[] WhosNotConfirmed() 
+    {
 		//check that the action that is going to be processed has been confirmed
-		if(confirmedPriorCount == lsm.numberOfPlayers) {
+		if(confirmedPriorCount == lsm.numberOfPlayers) 
+        {
 			return null;
 		}
 		//if 2nd turn, check that the 1st turns action has been confirmed
-		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID + 1) {
-			if(confirmedCurrentCount == lsm.numberOfPlayers) {
+		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID + 1) 
+        {
+			if(confirmedCurrentCount == lsm.numberOfPlayers) 
+            {
 				return null;
-			} else {
+			} 
+            else 
+            {
 				return WhosNotConfirmed (confirmedCurrent, confirmedCurrentCount);
 			}
 		}
 		//no action has been sent out prior to the first turn
-		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID) {
+		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID) 
+        {
 			return null;
 		}
 		
@@ -150,14 +172,18 @@ public class ConfirmedActions
 	/// confirmed are prior action.
 	/// </summary>
 	/// <returns>An array of not confirmed player IDs, or null if all players have confirmed</returns>
-	private int[] WhosNotConfirmed(bool[] confirmed, int confirmedCount) {
-		if(confirmedCount < lsm.numberOfPlayers) {
+	private int[] WhosNotConfirmed(bool[] confirmed, int confirmedCount) 
+    {
+		if(confirmedCount < lsm.numberOfPlayers) 
+        {
 			//the number of "not confirmed" is the number of players minus the number of "confirmed"
 			int[] notConfirmed = new int[lsm.numberOfPlayers - confirmedCount];
 			int count = 0;
 			//loop through each player and see who has not confirmed
-			for(int playerID = 0; playerID < lsm.numberOfPlayers; playerID++) {
-				if(!confirmed[playerID]) {
+			for(int playerID = 0; playerID < lsm.numberOfPlayers; playerID++) 
+            {
+				if(!confirmed[playerID]) 
+                {
 					//add "not confirmed" player ID to the array
 					notConfirmed[count] = playerID;
 					count++;
@@ -165,7 +191,9 @@ public class ConfirmedActions
 			}
 			
 			return notConfirmed;
-		} else {
+		} 
+        else 
+        {
 			return null;
 		}
 	}
@@ -174,8 +202,10 @@ public class ConfirmedActions
 	/// Sets every element of the boolean array to false
 	/// </summary>
 	/// <param name="a">The array to reset</param>
-	private void ResetArray(bool[] a) {
-		for(int i=0; i<a.Length; i++) {
+	private void ResetArray(bool[] a) 
+    {
+		for(int i=0; i<a.Length; i++) 
+        {
 			a[i] = false;
 		}
 	}
