@@ -36,18 +36,18 @@ public class SceneManager : MonoBehaviour {
 	public List<IHasGameFrame> GameFrameObjects;
 	
 	void Awake() {
-		SetupLog ();
+		SetupLog();
 		Manager = this;
 		GameFrameObjects = new List<IHasGameFrame>();
 	}
 	
 	// Use this for initialization
-	void Start () {
+	void Start() {
 		
 	}
 	
 	// Update is called once per frame
-	void Update () {
+	void Update() {
 	
 	}
 	
@@ -56,7 +56,7 @@ public class SceneManager : MonoBehaviour {
 	/// </summary>
 	void SetupLog() {
 		
-		object obj = Resources.Load ("logConfig");
+		object obj = Resources.Load("logConfig");
 		if(obj != null) {
 			TextAsset configText = obj as TextAsset;
 			if(configText != null) {

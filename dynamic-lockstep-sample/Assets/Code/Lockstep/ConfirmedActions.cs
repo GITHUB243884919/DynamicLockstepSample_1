@@ -39,14 +39,14 @@ public class ConfirmedActions
 	
 	private LockStepManager lsm;
 	
-	public ConfirmedActions (LockStepManager lsm)
+	public ConfirmedActions(LockStepManager lsm)
 	{
 		this.lsm = lsm;
 		confirmedCurrent = new bool[lsm.numberOfPlayers];
 		confirmedPrior = new bool[lsm.numberOfPlayers];
 		
 		ResetArray(confirmedCurrent);
-		ResetArray (confirmedPrior);
+		ResetArray(confirmedPrior);
 		
 		confirmedCurrentCount = 0;
 		confirmedPriorCount = 0;
@@ -57,12 +57,12 @@ public class ConfirmedActions
 	
 	public int GetPriorTime() 
     {
-		return ((int)priorSW.ElapsedMilliseconds);
+		return((int)priorSW.ElapsedMilliseconds);
 	}
 	
 	public void StartTimer() 
     {
-		currentSW.Start ();
+		currentSW.Start();
 	}
 	
 	public void NextTurn() 
@@ -82,7 +82,7 @@ public class ConfirmedActions
 		confirmedCurrent = swap;
 		confirmedCurrentCount = 0;
 		currentSW = swapSW;
-		currentSW.Reset ();
+		currentSW.Reset();
 	}
 	
 	public void ConfirmAction(int confirmingPlayerID, int currentLockStepTurn, int confirmedActionLockStepTurn) 
@@ -96,7 +96,7 @@ public class ConfirmedActions
 			//this gives us the length of the longest roundtrip message
 			if(confirmedCurrentCount == lsm.numberOfPlayers) 
             {
-				currentSW.Stop ();
+				currentSW.Stop();
 			}
 		} 
         else if(confirmedActionLockStepTurn == currentLockStepTurn -1) 
@@ -108,13 +108,13 @@ public class ConfirmedActions
 			//this gives us the length of the longest roundtrip message
 			if(confirmedPriorCount == lsm.numberOfPlayers) 
             {
-				priorSW.Stop ();
+				priorSW.Stop();
 			}
 		} 
         else 
         {
 			//TODO: Error Handling
-			UnityEngine.Debug.Log ("WARNING!!!! Unexpected lockstepID Confirmed : " + confirmedActionLockStepTurn + " from player: " + confirmingPlayerID);
+			UnityEngine.Debug.Log("WARNING!!!! Unexpected lockstepID Confirmed : " + confirmedActionLockStepTurn + " from player: " + confirmingPlayerID);
 		}
 	}
 	
@@ -155,7 +155,7 @@ public class ConfirmedActions
 			} 
             else 
             {
-				return WhosNotConfirmed (confirmedCurrent, confirmedCurrentCount);
+				return WhosNotConfirmed(confirmedCurrent, confirmedCurrentCount);
 			}
 		}
 		//no action has been sent out prior to the first turn
@@ -164,7 +164,7 @@ public class ConfirmedActions
 			return null;
 		}
 		
-		return WhosNotConfirmed (confirmedPrior, confirmedPriorCount);
+		return WhosNotConfirmed(confirmedPrior, confirmedPriorCount);
 	}
 	
 	/// <summary>

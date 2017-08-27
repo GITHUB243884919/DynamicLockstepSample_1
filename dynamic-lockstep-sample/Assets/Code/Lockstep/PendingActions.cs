@@ -40,7 +40,7 @@ public class PendingActions
 	
 	LockStepManager lsm;
 	
-	public PendingActions (LockStepManager lsm) {
+	public PendingActions(LockStepManager lsm) {
 		this.lsm = lsm;
 		
 		CurrentActions = new Action[lsm.numberOfPlayers];
@@ -83,7 +83,7 @@ public class PendingActions
 			//if action is for next turn, add for processing 3 turns away
 			if(NextNextNextActions[playerID] != null) {
 				//TODO: Error Handling
-				Debug.Log ("WARNING!!!! Recieved multiple actions for player " + playerID + " for turn "  + actionsLockStepTurn);
+				Debug.Log("WARNING!!!! Recieved multiple actions for player " + playerID + " for turn "  + actionsLockStepTurn);
 			}
 			NextNextNextActions[playerID] = action;
 			nextNextNextActionsCount++;
@@ -92,7 +92,7 @@ public class PendingActions
 			//add for processing 2 turns away
 			if(NextNextActions[playerID] != null) {
 				//TODO: Error Handling
-				Debug.Log ("WARNING!!!! Recieved multiple actions for player " + playerID + " for turn "  + actionsLockStepTurn);
+				Debug.Log("WARNING!!!! Recieved multiple actions for player " + playerID + " for turn "  + actionsLockStepTurn);
 			}
 			NextNextActions[playerID] = action;
 			nextNextActionsCount++;
@@ -101,13 +101,13 @@ public class PendingActions
 			//add for processing 1 turn away
 			if(NextActions[playerID] != null) {
 				//TODO: Error Handling
-				Debug.Log ("WARNING!!!! Recieved multiple actions for player " + playerID + " for turn "  + actionsLockStepTurn);
+				Debug.Log("WARNING!!!! Recieved multiple actions for player " + playerID + " for turn "  + actionsLockStepTurn);
 			}
 			NextActions[playerID] = action;
 			nextActionsCount++;
 		} else {
 			//TODO: Error Handling
-			Debug.Log ("WARNING!!!! Unexpected lockstepID recieved : " + actionsLockStepTurn);
+			Debug.Log("WARNING!!!! Unexpected lockstepID recieved : " + actionsLockStepTurn);
 			return;
 		}
 	}
@@ -144,14 +144,14 @@ public class PendingActions
 			if(nextActionsCount == lsm.numberOfPlayers) {
 				return null;
 			}else {
-				return WhosNotReady (NextActions, nextActionsCount);
+				return WhosNotReady(NextActions, nextActionsCount);
 			}
 			
 		} else if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID) {
 			//if this is the 1st turn, no actions had the chance to be recieved yet
 			return null;
 		} else {
-			return WhosNotReady (NextNextActions, nextNextActionsCount);
+			return WhosNotReady(NextNextActions, nextNextActionsCount);
 		}
 	}
 	

@@ -62,7 +62,7 @@ public class NetworkManager : MonoBehaviour {
 		if(refreshing) {
 			if(MasterServer.PollHostList().Length > 0) {
 				refreshing = false;
-				Debug.Log ("HostList Length: " + MasterServer.PollHostList().Length);
+				Debug.Log("HostList Length: " + MasterServer.PollHostList().Length);
 				hostData = MasterServer.PollHostList();
 			}
 		}
@@ -73,7 +73,7 @@ public class NetworkManager : MonoBehaviour {
 		
 		bool useNAT = !Network.HavePublicAddress();
 		Network.InitializeServer(32, 25001, useNAT);
-		MasterServer.RegisterHost (gameTypeName, "Sample_Game_Name", NetworkHostMessages.GenerateHostComment(NumberOfPlayers));
+		MasterServer.RegisterHost(gameTypeName, "Sample_Game_Name", NetworkHostMessages.GenerateHostComment(NumberOfPlayers));
 	}
 	
 	private void refreshHostList() {
@@ -83,22 +83,26 @@ public class NetworkManager : MonoBehaviour {
 	
 	private void PrintHostData() {
 		HostData[] hostData = MasterServer.PollHostList();
-		Debug.Log ("HostData length " + hostData.Length);
+		Debug.Log("HostData length " + hostData.Length);
 	}
 	
-	#region Messages
-	private void OnServerInitialized() {
-		Debug.Log ("Server initialized");
+	#region Unity内置网络回调函数
+	private void OnServerInitialized() 
+    {
+		Debug.Log("Server initialized");
 		Debug.Log("Expected player count : " + NumberOfPlayers);
 		//Notify any delegates that we are connected to the game
-        Debug.LogWarning("OnConnectedToGame " + (OnConnectedToGame != null).ToString());
-		if(OnConnectedToGame != null) {
+        //Debug.LogWarning("OnConnectedToGame " +(OnConnectedToGame != null).ToString());
+		if(OnConnectedToGame != null) 
+        {
 			OnConnectedToGame();
 		}
 
-		players.Add (Network.player.ToString(), Network.player);
-		if(NumberOfPlayers == 1) {
-			StartGame ();
+        Debug.Log("OnServerInitialized Add playerID " + Network.player.ToString());
+		players.Add(Network.player.ToString(), Network.player);
+		if(NumberOfPlayers == 1) 
+        {
+			StartGame();
 		}
 	}
 	
@@ -106,72 +110,75 @@ public class NetworkManager : MonoBehaviour {
 		Debug.Log("Master Server Event: " + mse.ToString());
 	}
 	
-	private void OnPlayerConnected (NetworkPlayer player) {
-		players.Add (player.ToString(), player);
-		Debug.Log ("OnPlayerConnected, playerID:" + player.ToString());
-		Debug.Log ("Player Count : " + players.Count);
+	private void OnPlayerConnected(NetworkPlayer player) {
+		players.Add(player.ToString(), player);
+		Debug.Log("OnPlayerConnected, add playerID:" + player.ToString());
+		Debug.Log("Player Count : " + players.Count);
 		//Once all expected players have joined, send all clients the list of players
 		if(players.Count == NumberOfPlayers) {
 			foreach(NetworkPlayer p in players.Values) {
-				Debug.Log ("Calling RegisterPlayerAll...");
+				Debug.Log("Calling RegisterPlayerAll...");
 				nv.RPC("RegisterPlayerAll", RPCMode.Others, p);
 			}
 			
 			//start the game
-			nv.RPC ("StartGame", RPCMode.All);
+			nv.RPC("StartGame", RPCMode.All);
 		}
 	}
-	
+
+    void OnDisconnectedFromServer(NetworkDisconnection info)
+    {
+        if(Network.isServer)
+            Debug.Log("Local server connection disconnected");
+        else
+            if(info == NetworkDisconnection.LostConnection)
+                Debug.Log("Lost connection to the server");
+            else
+                Debug.Log("Successfully diconnected from the server");
+    }
+    #endregion
+
 	/// <summary>
 	/// Called on clients only. Passes all connected players to be added to the players dictionary.
 	/// </summary>
 	[RPC]
 	public void RegisterPlayerAll(NetworkPlayer player) {
-		Debug.Log ("Register Player All called for " + player.ToString());
-		players.Add (player.ToString(), player);
+		Debug.Log("Register Player All called for " + player.ToString());
+		players.Add(player.ToString(), player);
 	}
 	
 	[RPC]
 	public void StartGame() {
-		Debug.Log ("StartGame called");
+		Debug.Log("StartGame called");
 		//send the start of game event
 		if(OnGameStart!=null) {
 			OnGameStart();
 		}
 	}
 	
-	void OnDisconnectedFromServer(NetworkDisconnection info) {
-        if (Network.isServer)
-            Debug.Log("Local server connection disconnected");
-        else
-            if (info == NetworkDisconnection.LostConnection)
-                Debug.Log("Lost connection to the server");
-            else
-                Debug.Log("Successfully diconnected from the server");
-    }
-	#endregion
+
 	
 	#region GUI
 	private void OnGUI() {
 		if(!Network.isClient && !Network.isServer) {
-			if(GUI.Button (new Rect(btnX, btnY, btnW, btnH), "Start Server")) {
+			if(GUI.Button(new Rect(btnX, btnY, btnW, btnH), "Start Server")) {
                 Debug.Log("Starting Server");
 				startServer();
 			}
 			
-			if(GUI.Button (new Rect(btnX, btnY + btnH, btnW, btnH), "Refresh Hosts")) {
-				Debug.Log ("Refreshing Hosts");
+			if(GUI.Button(new Rect(btnX, btnY + btnH, btnW, btnH), "Refresh Hosts")) {
+				Debug.Log("Refreshing Hosts");
 				refreshHostList();
 			}
 			
 			if(hostData!=null) {
 				int i =0;
 				foreach(HostData hd in hostData) {
-					if(GUI.Button (new Rect(btnX * 1.5f + btnW, btnY * 1.2f + (btnH * i), btnW * 3f, btnH * 0.5f), hd.gameName)) {
-						Debug.Log ("Connecting to server");
-						Network.Connect (hd);
+					if(GUI.Button(new Rect(btnX * 1.5f + btnW, btnY * 1.2f +(btnH * i), btnW * 3f, btnH * 0.5f), hd.gameName)) {
+						Debug.Log("Connecting to server");
+						Network.Connect(hd);
 						//Notify any delegates that we are connected to the game
-                        Debug.LogWarning("OnConnectedToGame " + (OnConnectedToGame != null).ToString());
+                        Debug.LogWarning("OnConnectedToGame " +(OnConnectedToGame != null).ToString());
 						if(OnConnectedToGame != null) {
 							OnConnectedToGame();
 						}

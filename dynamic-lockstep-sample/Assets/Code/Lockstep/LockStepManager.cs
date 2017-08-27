@@ -34,7 +34,8 @@ using Debug = UnityEngine.Debug;
 /// fzy end
 /// </summary>
 [RequireComponent(typeof(NetworkView))]
-public class LockStepManager : MonoBehaviour {
+public class LockStepManager : MonoBehaviour 
+{
 	
 	private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 	
@@ -120,7 +121,8 @@ public class LockStepManager : MonoBehaviour {
 	private int AccumilatedTime = 0; //the accumilated time in Milliseconds that have passed since the last time GameFrame was called
 	
 	// Use this for initialization
-	void Start () {
+	void Start() 
+    {
 		enabled = false;
 		
 		Instance = this;
@@ -131,8 +133,12 @@ public class LockStepManager : MonoBehaviour {
 	}
 	
 	#region GameStart
-	public void InitGameStartLists() {
-		if(initialized) { return; }
+	public void InitGameStartLists()
+    {
+		if (initialized) 
+        { 
+            return;
+        }
 		
 		readyPlayers = new List<string>(numberOfPlayers);
 		playersConfirmedImReady = new List<string>(numberOfPlayers);
@@ -140,9 +146,16 @@ public class LockStepManager : MonoBehaviour {
 		initialized = true;
 	}
 	
-	public void PrepGameStart() {
+    /// <summary>
+    /// fzy
+    /// 这个函数是被NetworkManager.StartGame调用
+    /// Server端自己初始化后会被调用
+    /// Server端发现有客户端连接后RPC调用客户端的
+    /// </summary>
+	public void PrepGameStart() 
+    {
 		
-		Debug.Log ("GameStart called. My PlayerID: " + Network.player.ToString());
+		Debug.Log("GameStart called. My PlayerID: " + Network.player.ToString());
 		LockStepTurnID = FirstLockStepTurnID;
 		numberOfPlayers = gameSetup.NumberOfPlayers;
 		pendingActions = new PendingActions(this);
@@ -156,7 +169,7 @@ public class LockStepManager : MonoBehaviour {
 		
 		InitGameStartLists();
 		
-		nv.RPC ("ReadyToStart", RPCMode.AllBuffered, Network.player.ToString());
+		nv.RPC("ReadyToStart", RPCMode.AllBuffered, Network.player.ToString());
 	}
 	
 	private void CheckGameStart() {
@@ -175,7 +188,7 @@ public class LockStepManager : MonoBehaviour {
 				playersConfirmedImReady = null;
 				readyPlayers = null;
 				
-				GameStart ();
+				GameStart();
 			}
 		}
 	}
@@ -186,15 +199,17 @@ public class LockStepManager : MonoBehaviour {
 	}
 	
 	[RPC]
-	public void ReadyToStart(string playerID) {
+	public void ReadyToStart(string playerID) 
+    {
 		Debug.Log("Player " + playerID + " is ready to start the game.");
 		
 		//make sure initialization has already happened -incase another player sends game start before we are ready to handle it
-		InitGameStartLists();;
+		InitGameStartLists();
 		
-		readyPlayers.Add (playerID);
+		readyPlayers.Add(playerID);
 		
-		if(Network.isServer) {
+		if(Network.isServer) 
+        {
 			//don't need an rpc call if we are the server
 			ConfirmReadyToStartServer(Network.player.ToString() /*confirmingPlayerID*/, playerID /*confirmedPlayerID*/);
 		} else {
@@ -206,20 +221,24 @@ public class LockStepManager : MonoBehaviour {
 	}
 	
 	[RPC]
-	public void ConfirmReadyToStartServer(string confirmingPlayerID, string confirmedPlayerID) {
-		if(!Network.isServer) { return; } //workaround when multiple players running on same machine
+	public void ConfirmReadyToStartServer(string confirmingPlayerID, string confirmedPlayerID) 
+    {
+		if(!Network.isServer) 
+        { 
+            return;
+        } //workaround when multiple players running on same machine
 		
 		Debug.Log("Server Message: Player " + confirmingPlayerID + " is confirming Player " + confirmedPlayerID + " is ready to start the game.");
 		
 		//validate ID
 		if(!gameSetup.players.ContainsKey(confirmingPlayerID)) {
 			//TODO: error handling
-			Debug.Log("Server Message: WARNING!!! Unrecognized confirming playerID: " + confirmingPlayerID);
+			Debug.LogError("Server Message: WARNING!!! Unrecognized confirming playerID: " + confirmingPlayerID);
 			return;
 		}
 		if(!gameSetup.players.ContainsKey(confirmedPlayerID)) {
 			//TODO: error handling
-			Debug.Log("Server Message: WARNING!!! Unrecognized confirmed playerID: " + confirmingPlayerID);
+            Debug.LogError("Server Message: WARNING!!! Unrecognized confirmed playerID: " + confirmingPlayerID);
 		}
 		
 		//relay message to confirmed client
@@ -227,7 +246,7 @@ public class LockStepManager : MonoBehaviour {
 			//don't need an rpc call if we are the server
 			ConfirmReadyToStart(confirmedPlayerID, confirmingPlayerID);
 		} else {
-			nv.RPC ("ConfirmReadyToStart", RPCMode.OthersBuffered, confirmedPlayerID, confirmingPlayerID);
+			nv.RPC("ConfirmReadyToStart", RPCMode.OthersBuffered, confirmedPlayerID, confirmingPlayerID);
 		}
 		
 	}
@@ -236,8 +255,8 @@ public class LockStepManager : MonoBehaviour {
 	public void ConfirmReadyToStart(string confirmedPlayerID, string confirmingPlayerID) {
 		if(!Network.player.ToString().Equals(confirmedPlayerID)) { return; }
 		
-		//Debug.Log ("Player " + confirmingPlayerID + " confirmed I am ready to start the game.");
-		playersConfirmedImReady.Add (confirmingPlayerID);
+		//Debug.Log("Player " + confirmingPlayerID + " confirmed I am ready to start the game.");
+		playersConfirmedImReady.Add(confirmingPlayerID);
 		
 		//Check if we can start the game
 		CheckGameStart();
@@ -246,7 +265,7 @@ public class LockStepManager : MonoBehaviour {
 	
 	#region Actions
 	public void AddAction(Action action) {
-		Debug.Log ("Action Added");
+		Debug.Log("Action Added");
 		if(!initialized) {
 			Debug.Log("Game has not started, action will be ignored.");
 			return;
@@ -256,7 +275,7 @@ public class LockStepManager : MonoBehaviour {
 	
 	private bool LockStepTurn() 
     {
-		Debug.Log ("LockStepTurnID: " + LockStepTurnID);
+		Debug.Log("LockStepTurnID: " + LockStepTurnID);
         //fzy begin
         //检查两点
         //1.我们已经收到了所有客户端的下一轮动作了吗？
@@ -269,7 +288,7 @@ public class LockStepManager : MonoBehaviour {
             //fzy begin
             //向其他服务器/客户端发送下本客户端下一轮的动作
             //fzy end
-			SendPendingAction ();
+			SendPendingAction();
 			//the first and second lockstep turn will not be ready to process yet
 			if(LockStepTurnID >= FirstLockStepTurnID + 3) 
             {
@@ -278,7 +297,7 @@ public class LockStepManager : MonoBehaviour {
                 //从道理上讲，这些Action中有本客户端控制的玩家，也有其他客户端控制的玩家
                 //比如说，可能本客户端的玩家移动，也有同步的其他客户端的玩家移动
                 //fzy end
-				ProcessActions ();
+				ProcessActions();
 			}
 		}
 		//otherwise wait another turn to recieve all input from all players
@@ -294,13 +313,13 @@ public class LockStepManager : MonoBehaviour {
 	/// </summary>
 	private bool NextTurn() 
     {
-		//		Debug.Log ("Next Turn Check: Current Turn - " + LockStepTurnID);
-		//		Debug.Log ("    priorConfirmedCount - " + confirmedActions.playersConfirmedPriorAction.Count);
-		//		Debug.Log ("    currentConfirmedCount - " + confirmedActions.playersConfirmedCurrentAction.Count);
-		//		Debug.Log ("    allPlayerCurrentActionsCount - " + pendingActions.CurrentActions.Count);
-		//		Debug.Log ("    allPlayerNextActionsCount - " + pendingActions.NextActions.Count);
-		//		Debug.Log ("    allPlayerNextNextActionsCount - " + pendingActions.NextNextActions.Count);
-		//		Debug.Log ("    allPlayerNextNextNextActionsCount - " + pendingActions.NextNextNextActions.Count);
+		//		Debug.Log("Next Turn Check: Current Turn - " + LockStepTurnID);
+		//		Debug.Log("    priorConfirmedCount - " + confirmedActions.playersConfirmedPriorAction.Count);
+		//		Debug.Log("    currentConfirmedCount - " + confirmedActions.playersConfirmedCurrentAction.Count);
+		//		Debug.Log("    allPlayerCurrentActionsCount - " + pendingActions.CurrentActions.Count);
+		//		Debug.Log("    allPlayerNextActionsCount - " + pendingActions.NextActions.Count);
+		//		Debug.Log("    allPlayerNextNextActionsCount - " + pendingActions.NextNextActions.Count);
+		//		Debug.Log("    allPlayerNextNextNextActionsCount - " + pendingActions.NextNextNextActions.Count);
 		
         //fzy begin
         //检查两点
@@ -327,23 +346,23 @@ public class LockStepManager : MonoBehaviour {
             else 
             {
 				StringBuilder sb = new StringBuilder();
-				sb.Append ("Have not recieved player(s) actions: ");
-				foreach(int i in pendingActions.WhosNotReady ()) 
+				sb.Append("Have not recieved player(s) actions: ");
+				foreach(int i in pendingActions.WhosNotReady()) 
                 {
-					sb.Append (i + ", ");
+					sb.Append(i + ", ");
 				}
-				Debug.Log(sb.ToString ());
+				Debug.Log(sb.ToString());
 			}
 		} 
         else 
         {
 			StringBuilder sb = new StringBuilder();
-			sb.Append ("Have not recieved confirmation from player(s): ");
-			foreach(int i in pendingActions.WhosNotReady ()) 
+			sb.Append("Have not recieved confirmation from player(s): ");
+			foreach(int i in pendingActions.WhosNotReady()) 
             {
-				sb.Append (i + ", ");
+				sb.Append(i + ", ");
 			}
-			Debug.Log(sb.ToString ());
+			Debug.Log(sb.ToString());
 		}
 		
 		//		if(confirmedActions.ReadyForNextTurn() && pendingActions.ReadyForNextTurn()) {
@@ -371,31 +390,31 @@ public class LockStepManager : MonoBehaviour {
 			action = new NoAction();
 		}
 		
-		//action.NetworkAverage = Network.GetLastPing (Network.connections[0/*host player*/]);
+		//action.NetworkAverage = Network.GetLastPing(Network.connections[0/*host player*/]);
 		if(LockStepTurnID > FirstLockStepTurnID + 1) {
 			action.NetworkAverage = confirmedActions.GetPriorTime();
 		} else {
 			action.NetworkAverage = initialLockStepTurnLength;
 		}
-		action.RuntimeAverage = Convert.ToInt32 (currentGameFrameRuntime);
+		action.RuntimeAverage = Convert.ToInt32(currentGameFrameRuntime);
 		//clear the current runtime average
 		currentGameFrameRuntime = 0;
 		
 		//add action to our own list of actions to process
 		pendingActions.AddAction(action, Convert.ToInt32(Network.player.ToString()), LockStepTurnID, LockStepTurnID);
 		//start the confirmed action timer for network average
-		confirmedActions.StartTimer ();
+		confirmedActions.StartTimer();
 		//confirm our own action
-		confirmedActions.ConfirmAction(Convert.ToInt32(Network.player.ToString ()), LockStepTurnID, LockStepTurnID);
+		confirmedActions.ConfirmAction(Convert.ToInt32(Network.player.ToString()), LockStepTurnID, LockStepTurnID);
 		//send action to all other players
 		nv.RPC("RecieveAction", RPCMode.Others, LockStepTurnID, Network.player.ToString(), BinarySerialization.SerializeObjectToByteArray(action));
 		
-		Debug.Log("Sent " + (action.GetType().Name) + " action for turn " + LockStepTurnID);
+		Debug.Log("Sent " +(action.GetType().Name) + " action for turn " + LockStepTurnID);
 	}
 	
 	private void ProcessActions() {
 		//process action should be considered in runtime performance
-		gameTurnSW.Start ();
+		gameTurnSW.Start();
 		
         //fzy begin
         //这里为什么要pendingActions拆分成两段执行
@@ -406,15 +425,15 @@ public class LockStepManager : MonoBehaviour {
             i< pendingActions.CurrentActions.Length; i++)
         {
 			pendingActions.CurrentActions[i].ProcessAction();
-			runtimeAverage.Add (pendingActions.CurrentActions[i].RuntimeAverage, i);
-			networkAverage.Add (pendingActions.CurrentActions[i].NetworkAverage, i);
+			runtimeAverage.Add(pendingActions.CurrentActions[i].RuntimeAverage, i);
+			networkAverage.Add(pendingActions.CurrentActions[i].NetworkAverage, i);
 		}
 		
 		for(int i=0; i<playerIDToProcessFirst; i++) 
         {
 			pendingActions.CurrentActions[i].ProcessAction();
-			runtimeAverage.Add (pendingActions.CurrentActions[i].RuntimeAverage, i);
-			networkAverage.Add (pendingActions.CurrentActions[i].NetworkAverage, i);
+			runtimeAverage.Add(pendingActions.CurrentActions[i].RuntimeAverage, i);
+			networkAverage.Add(pendingActions.CurrentActions[i].NetworkAverage, i);
 		}
 		
 		playerIDToProcessFirst++;
@@ -423,15 +442,15 @@ public class LockStepManager : MonoBehaviour {
 		}
 		
 		//finished processing actions for this turn, stop the stopwatch
-		gameTurnSW.Stop ();
+		gameTurnSW.Stop();
 	}
 	
 	[RPC]
 	public void RecieveAction(int lockStepTurn, string playerID, byte[] actionAsBytes) {
-		//Debug.Log ("Recieved Player " + playerID + "'s action for turn " + lockStepTurn + " on turn " + LockStepTurnID);
+		//Debug.Log("Recieved Player " + playerID + "'s action for turn " + lockStepTurn + " on turn " + LockStepTurnID);
 		Action action = BinarySerialization.DeserializeObject<Action>(actionAsBytes);
 		if(action == null) {
-			Debug.Log ("Sending action failed");
+			Debug.Log("Sending action failed");
 			//TODO: Error handle invalid actions recieve
 		} else {
 			pendingActions.AddAction(action, Convert.ToInt32(playerID), LockStepTurnID, lockStepTurn);
@@ -439,9 +458,9 @@ public class LockStepManager : MonoBehaviour {
 			//send confirmation
 			if(Network.isServer) {
 				//we don't need an rpc call if we are the server
-				ConfirmActionServer (lockStepTurn, Network.player.ToString(), playerID);
+				ConfirmActionServer(lockStepTurn, Network.player.ToString(), playerID);
 			} else {
-				nv.RPC ("ConfirmActionServer", RPCMode.Server, lockStepTurn, Network.player.ToString(), playerID);
+				nv.RPC("ConfirmActionServer", RPCMode.Server, lockStepTurn, Network.player.ToString(), playerID);
 			}
 		}
 	}
@@ -463,16 +482,16 @@ public class LockStepManager : MonoBehaviour {
 	
 	[RPC]
 	public void ConfirmAction(int lockStepTurn, string confirmingPlayerID) {
-		confirmedActions.ConfirmAction (Convert.ToInt32(confirmingPlayerID), LockStepTurnID, lockStepTurn);
+		confirmedActions.ConfirmAction(Convert.ToInt32(confirmingPlayerID), LockStepTurnID, lockStepTurn);
 	}
 	#endregion
 	
 	#region Game Frame
 	private void UpdateGameFrameRate() {
-		//Debug.Log ("Runtime Average is " + runtimeAverage.GetMax ());
-		//Debug.Log ("Network Average is " + networkAverage.GetMax ());
-		LockstepTurnLength = (networkAverage.GetMax () * 2/*two round trips*/) + 1/*minimum of 1 ms*/;
-		GameFrameTurnLength = runtimeAverage.GetMax ();
+		//Debug.Log("Runtime Average is " + runtimeAverage.GetMax());
+		//Debug.Log("Network Average is " + networkAverage.GetMax());
+		LockstepTurnLength =(networkAverage.GetMax() * 2/*two round trips*/) + 1/*minimum of 1 ms*/;
+		GameFrameTurnLength = runtimeAverage.GetMax();
 		
 		//lockstep turn has to be at least as long as one game frame
 		if(GameFrameTurnLength > LockstepTurnLength) {
@@ -491,7 +510,7 @@ public class LockStepManager : MonoBehaviour {
         //LockstepsPerSecond 是每秒内lockstep回合的次数
         //LockstepTurnLength的单位是毫秒，所以得用1000去除以LockstepTurnLength
         //fzy end
-		LockstepsPerSecond = (1000 / LockstepTurnLength);
+		LockstepsPerSecond =(1000 / LockstepTurnLength);
 		if(LockstepsPerSecond == 0) 
         {
             LockstepsPerSecond = 1; //minimum per second
@@ -512,7 +531,7 @@ public class LockStepManager : MonoBehaviour {
 		//in case the FPS is too slow, we may need to update the game multiple times a frame
 		while(AccumilatedTime > GameFrameTurnLength) 
         {
-			GameFrameTurn ();
+			GameFrameTurn();
 			AccumilatedTime = AccumilatedTime - GameFrameTurnLength;
 		}
 	}
@@ -543,7 +562,7 @@ public class LockStepManager : MonoBehaviour {
         //这个Finished怎么用？
         //fzy end
 		//update game
-		//SceneManager.Manager.TwoDPhysics.Update (GameFramesPerSecond);
+		//SceneManager.Manager.TwoDPhysics.Update(GameFramesPerSecond);
 		List<IHasGameFrame> finished = new List<IHasGameFrame>();
 		foreach(IHasGameFrame obj in SceneManager.Manager.GameFrameObjects) 
         {
@@ -553,7 +572,7 @@ public class LockStepManager : MonoBehaviour {
             //fzy end
 			if(obj.Finished) 
             {
-				finished.Add (obj);
+				finished.Add(obj);
 			}
 		}
 
@@ -562,7 +581,7 @@ public class LockStepManager : MonoBehaviour {
         //fzy end
 		foreach(IHasGameFrame obj in finished) 
         {
-			SceneManager.Manager.GameFrameObjects.Remove (obj);
+			SceneManager.Manager.GameFrameObjects.Remove(obj);
 		}
 		
         //fzy begin
@@ -577,7 +596,7 @@ public class LockStepManager : MonoBehaviour {
 		}
 		
 		//stop the stop watch, the gameframe turn is over
-		gameTurnSW.Stop ();
+		gameTurnSW.Stop();
 
         //fzy begin
         //gameTurnSW记录了本轮执行所有IHasGameFrame的GameFrameTurn时间。
@@ -587,7 +606,7 @@ public class LockStepManager : MonoBehaviour {
         //fzy end
 		//update only if it's larger - we will use the game frame that took the longest in this lockstep turn
         //deltaTime is in secounds, convert to milliseconds
-		long runtime = Convert.ToInt32 ((Time.deltaTime * 1000)) + gameTurnSW.ElapsedMilliseconds;
+		long runtime = Convert.ToInt32((Time.deltaTime * 1000)) + gameTurnSW.ElapsedMilliseconds;
 		if(runtime > currentGameFrameRuntime) 
         {
 			currentGameFrameRuntime = runtime;
