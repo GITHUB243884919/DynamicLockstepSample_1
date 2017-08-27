@@ -91,6 +91,7 @@ public class NetworkManager : MonoBehaviour {
 		Debug.Log ("Server initialized");
 		Debug.Log("Expected player count : " + NumberOfPlayers);
 		//Notify any delegates that we are connected to the game
+        Debug.LogWarning("OnConnectedToGame " + (OnConnectedToGame != null).ToString());
 		if(OnConnectedToGame != null) {
 			OnConnectedToGame();
 		}
@@ -170,6 +171,7 @@ public class NetworkManager : MonoBehaviour {
 						Debug.Log ("Connecting to server");
 						Network.Connect (hd);
 						//Notify any delegates that we are connected to the game
+                        Debug.LogWarning("OnConnectedToGame " + (OnConnectedToGame != null).ToString());
 						if(OnConnectedToGame != null) {
 							OnConnectedToGame();
 						}
