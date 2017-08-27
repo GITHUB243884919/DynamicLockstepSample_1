@@ -158,7 +158,7 @@ public class NetworkManager : MonoBehaviour {
 				startServer();
 			}
 			
-			if(GUI.Button (new Rect(btnX, btnY * 1.2f + btnH, btnW, btnH), "Refresh Hosts")) {
+			if(GUI.Button (new Rect(btnX, btnY + btnH, btnW, btnH), "Refresh Hosts")) {
 				log.Debug ("Refreshing Hosts");
 				refreshHostList();
 			}
