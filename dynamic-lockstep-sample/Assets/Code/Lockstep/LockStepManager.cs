@@ -132,7 +132,7 @@ public class LockStepManager : MonoBehaviour
 		gameSetup.OnGameStart += PrepGameStart;
 	}
 	
-	#region GameStart
+	#region Locksetp开始前的准备工作 GameStart
 	public void InitGameStartLists()
     {
 		if (initialized) 
@@ -149,8 +149,8 @@ public class LockStepManager : MonoBehaviour
     /// <summary>
     /// fzy
     /// 这个函数是被NetworkManager.StartGame调用
-    /// Server端自己初始化后会被调用
-    /// Server端发现有客户端连接后RPC调用客户端的
+    /// Server端发现有客户端连接后RPC调用客户端的，在这个例子里也包括服务端的，因为把服务端也当
+    /// 成其中一个客户端了
     /// </summary>
 	public void PrepGameStart() 
     {
@@ -172,15 +172,24 @@ public class LockStepManager : MonoBehaviour
 		nv.RPC("ReadyToStart", RPCMode.AllBuffered, Network.player.ToString());
 	}
 	
-	private void CheckGameStart() {
-		if(playersConfirmedImReady == null) {
+    /// <summary>
+    /// fzy
+    /// 这里检查的是端的数量是否够，因为调用本函数之前会调用ConfirmReadyToStartServer
+    /// 来确保连上的端都是否合法
+    /// </summary>
+	private void CheckGameStart() 
+    {
+		if(playersConfirmedImReady == null) 
+        {
 			Debug.Log("WARNING!!! Unexpected null reference during game start. IsInit? " + initialized);
 			return;
 		}
 		//check if all expected players confirmed our gamestart message
-		if(playersConfirmedImReady.Count == numberOfPlayers) {
+		if(playersConfirmedImReady.Count == numberOfPlayers) 
+        {
 			//check if all expected players sent their gamestart message
-			if(readyPlayers.Count == numberOfPlayers) {
+			if(readyPlayers.Count == numberOfPlayers) 
+            {
 				//we are ready to start
 				Debug.Log("All players are ready to start. Starting Game.");
 				
@@ -193,7 +202,13 @@ public class LockStepManager : MonoBehaviour
 		}
 	}
 	
-	private void GameStart() {
+    /// <summary>
+    /// fzy
+    /// 在Start()函数中设置enabled=false，是让Mono的内置函数都不能执行，其实主要是为了限制Update函数
+    /// 在可以开始后，也就需要Update了，因此这个函数也就需要一行enabled = true
+    /// </summary>
+	private void GameStart() 
+    {
 		//start the LockStep Turn loop
 		enabled = true;
 	}
@@ -208,11 +223,17 @@ public class LockStepManager : MonoBehaviour
 		
 		readyPlayers.Add(playerID);
 		
+        //fzy begin
+        //这里的代码逻辑上，无论Network.isServer是否为true，都是调用的ConfirmReadyToStartServer
+        //但在ConfirmReadyToStartServer内的代码逻辑上，只有Network.isServer才调用
+        //fzy end
 		if(Network.isServer) 
         {
 			//don't need an rpc call if we are the server
 			ConfirmReadyToStartServer(Network.player.ToString() /*confirmingPlayerID*/, playerID /*confirmedPlayerID*/);
-		} else {
+		} 
+        else 
+        {
 			nv.RPC("ConfirmReadyToStartServer", RPCMode.Server, Network.player.ToString() /*confirmingPlayerID*/, playerID /*confirmedPlayerID*/);
 		}
 		
@@ -220,6 +241,13 @@ public class LockStepManager : MonoBehaviour
 		CheckGameStart();
 	}
 	
+    /// <summary>
+    /// fzy
+    /// 只是服务端用
+    /// 检查连上来的客户端是否是最开始连接的客户端，也就是检查连上的端是否合法
+    /// </summary>
+    /// <param name="confirmingPlayerID"></param>
+    /// <param name="confirmedPlayerID"></param>
 	[RPC]
 	public void ConfirmReadyToStartServer(string confirmingPlayerID, string confirmedPlayerID) 
     {
@@ -231,7 +259,8 @@ public class LockStepManager : MonoBehaviour
 		Debug.Log("Server Message: Player " + confirmingPlayerID + " is confirming Player " + confirmedPlayerID + " is ready to start the game.");
 		
 		//validate ID
-		if(!gameSetup.players.ContainsKey(confirmingPlayerID)) {
+		if(!gameSetup.players.ContainsKey(confirmingPlayerID)) 
+        {
 			//TODO: error handling
 			Debug.LogError("Server Message: WARNING!!! Unrecognized confirming playerID: " + confirmingPlayerID);
 			return;
@@ -241,19 +270,29 @@ public class LockStepManager : MonoBehaviour
             Debug.LogError("Server Message: WARNING!!! Unrecognized confirmed playerID: " + confirmingPlayerID);
 		}
 		
+        //fzy begin
+        //通知所有端，调用ConfirmReadyToStart，只是在调用方式上做了优化，服务端用本地调用，客户端才用RPC
+        //fzy end
 		//relay message to confirmed client
-		if(Network.player.ToString().Equals(confirmedPlayerID)) {
+		if(Network.player.ToString().Equals(confirmedPlayerID)) 
+        {
 			//don't need an rpc call if we are the server
 			ConfirmReadyToStart(confirmedPlayerID, confirmingPlayerID);
-		} else {
+		} 
+        else 
+        {
 			nv.RPC("ConfirmReadyToStart", RPCMode.OthersBuffered, confirmedPlayerID, confirmingPlayerID);
 		}
 		
 	}
 	
 	[RPC]
-	public void ConfirmReadyToStart(string confirmedPlayerID, string confirmingPlayerID) {
-		if(!Network.player.ToString().Equals(confirmedPlayerID)) { return; }
+	public void ConfirmReadyToStart(string confirmedPlayerID, string confirmingPlayerID) 
+    {
+		if(!Network.player.ToString().Equals(confirmedPlayerID)) 
+        { 
+            return; 
+        }
 		
 		//Debug.Log("Player " + confirmingPlayerID + " confirmed I am ready to start the game.");
 		playersConfirmedImReady.Add(confirmingPlayerID);
@@ -264,9 +303,11 @@ public class LockStepManager : MonoBehaviour
 	#endregion
 	
 	#region Actions
-	public void AddAction(Action action) {
+	public void AddAction(Action action) 
+    {
 		Debug.Log("Action Added");
-		if(!initialized) {
+		if(!initialized) 
+        {
 			Debug.Log("Game has not started, action will be ignored.");
 			return;
 		}
@@ -381,19 +422,24 @@ public class LockStepManager : MonoBehaviour
 	
 	private void SendPendingAction() {
 		Action action = null;
-		if(actionsToSend.Count > 0) {
+		if(actionsToSend.Count > 0) 
+        {
 			action = actionsToSend.Dequeue();
 		}
 		
 		//if no action for this turn, send the NoAction action
-		if(action == null) {
+		if(action == null) 
+        {
 			action = new NoAction();
 		}
 		
 		//action.NetworkAverage = Network.GetLastPing(Network.connections[0/*host player*/]);
-		if(LockStepTurnID > FirstLockStepTurnID + 1) {
+		if(LockStepTurnID > FirstLockStepTurnID + 1) 
+        {
 			action.NetworkAverage = confirmedActions.GetPriorTime();
-		} else {
+		} 
+        else 
+        {
 			action.NetworkAverage = initialLockStepTurnLength;
 		}
 		action.RuntimeAverage = Convert.ToInt32(currentGameFrameRuntime);
@@ -475,33 +521,39 @@ public class LockStepManager : MonoBehaviour
 		if(Network.player.ToString().Equals(confirmedPlayerID)) {
 			//we don't need an RPC call if this is the server
 			ConfirmAction(lockStepTurn, confirmingPlayerID);
-		} else {
+		} 
+        else 
+        {
 			nv.RPC("ConfirmAction", gameSetup.players[confirmedPlayerID], lockStepTurn, confirmingPlayerID);
 		}
 	}
 	
 	[RPC]
-	public void ConfirmAction(int lockStepTurn, string confirmingPlayerID) {
+	public void ConfirmAction(int lockStepTurn, string confirmingPlayerID) 
+    {
 		confirmedActions.ConfirmAction(Convert.ToInt32(confirmingPlayerID), LockStepTurnID, lockStepTurn);
 	}
 	#endregion
 	
 	#region Game Frame
-	private void UpdateGameFrameRate() {
+	private void UpdateGameFrameRate() 
+    {
 		//Debug.Log("Runtime Average is " + runtimeAverage.GetMax());
 		//Debug.Log("Network Average is " + networkAverage.GetMax());
 		LockstepTurnLength =(networkAverage.GetMax() * 2/*two round trips*/) + 1/*minimum of 1 ms*/;
 		GameFrameTurnLength = runtimeAverage.GetMax();
 		
 		//lockstep turn has to be at least as long as one game frame
-		if(GameFrameTurnLength > LockstepTurnLength) {
+		if(GameFrameTurnLength > LockstepTurnLength) 
+        {
 			LockstepTurnLength = GameFrameTurnLength;
 		}
 		
 		GameFramesPerLockstepTurn = LockstepTurnLength / GameFrameTurnLength;
 		//if gameframe turn length does not evenly divide the lockstep turn, there is extra time left after the last
 		//game frame. Add one to the game frame turn length so it will consume it and recalculate the Lockstep turn length
-		if(LockstepTurnLength % GameFrameTurnLength > 0) {
+		if(LockstepTurnLength % GameFrameTurnLength > 0) 
+        {
 			GameFrameTurnLength++;
 			LockstepTurnLength = GameFramesPerLockstepTurn * GameFrameTurnLength;
 		}
