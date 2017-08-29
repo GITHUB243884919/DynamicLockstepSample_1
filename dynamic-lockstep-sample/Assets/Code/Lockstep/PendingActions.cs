@@ -54,6 +54,14 @@ public class PendingActions
 		nextNextNextActionsCount = 0;
 	}
 	
+    /// <summary>
+    /// fzy
+    /// 把当前的Action放到交换
+    /// 把当前的Action赋值成下一
+    /// 把下一赋值成下下一
+    /// 把下下一赋值成下下下一
+    /// 把下下下一赋值成交换
+    /// </summary>
 	public void NextTurn() {
 		//Finished processing this turns actions - clear it
 		for(int i=0; i<CurrentActions.Length; i++) {
@@ -112,8 +120,10 @@ public class PendingActions
 		}
 	}
 	
-	public bool ReadyForNextTurn() {
-		if(nextNextActionsCount == lsm.numberOfPlayers) {
+	public bool ReadyForNextTurn() 
+    {
+		if(nextNextActionsCount == lsm.numberOfPlayers) 
+        {
 			//if this is the 2nd turn, check if all the actions sent out on the 1st turn have been recieved
 			if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID + 1) {
 				return true;
@@ -126,7 +136,8 @@ public class PendingActions
 		}
 		
 		//if this is the 1st turn, no actions had the chance to be recieved yet
-		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID) {
+		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID) 
+        {
 			return true;
 		}
 		//if none of the conditions have been met, return false

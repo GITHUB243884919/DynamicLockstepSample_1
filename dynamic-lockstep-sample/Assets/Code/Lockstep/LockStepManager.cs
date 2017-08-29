@@ -53,9 +53,11 @@ public class LockStepManager : MonoBehaviour
     //当(GameFrame == GameFramesPerLockstepTurn) 时GameFrame重设置为0
     //fzy end
     private int GameFrame = 0; //Current Game Frame number in the currect lockstep turn
-	public int numberOfPlayers;
 
-	
+    //fzy begin
+    //参与同步的端的数量，是从NetworkManager中取过来的，这个值是预先设定好的
+    //fzy end
+	public int numberOfPlayers;
 
 	private PendingActions pendingActions;
 	private ConfirmedActions confirmedActions;

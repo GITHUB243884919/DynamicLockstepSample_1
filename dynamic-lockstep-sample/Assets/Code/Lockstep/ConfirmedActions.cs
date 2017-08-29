@@ -31,6 +31,9 @@ public class ConfirmedActions
 	private bool[] confirmedPrior;
 	
 	private int confirmedCurrentCount;
+    //fzy begin
+    //上一次的收到的个数
+    //fzy end
 	private int confirmedPriorCount;
 	
 	//Stop watches used to adjust lockstep turn length
@@ -65,6 +68,13 @@ public class ConfirmedActions
 		currentSW.Start();
 	}
 	
+    /// <summary>
+    /// fzy
+    /// 把前一轮的和本轮做交换
+    /// 前一轮放到交换
+    /// 前一轮被赋值成当前
+    /// 当前被赋值成交换（也就是上一轮的）
+    /// </summary>
 	public void NextTurn() 
     {
 		//clear prior actions
@@ -118,6 +128,10 @@ public class ConfirmedActions
 		}
 	}
 	
+    /// <summary>
+    /// 第一次满足条件3 返回true
+    /// </summary>
+    /// <returns></returns>
 	public bool ReadyForNextTurn() 
     {
 		//check that the action that is going to be processed has been confirmed
@@ -130,6 +144,11 @@ public class ConfirmedActions
         {
 			return confirmedCurrentCount == lsm.numberOfPlayers;
 		}
+
+        //fzy begin
+        //条件3
+        //第一次，Lockstep的第一轮
+        //fzy end
 		//no action has been sent out prior to the first turn
 		if(lsm.LockStepTurnID == LockStepManager.FirstLockStepTurnID) 
         {
