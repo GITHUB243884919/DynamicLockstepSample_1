@@ -422,6 +422,18 @@ public class LockStepManager : MonoBehaviour
 		return false;
 	}
 	
+    /// <summary>
+    /// fzy
+    /// 向其他端发送动作
+    /// 1.从actionsToSend取出一个Action
+    /// 2.如果actionsToSend没有动作，发送一个NoAction
+    /// 3.计算action.NetworkAverage
+    ///   如果LockStepTurnID（本Lockstep的轮数）>1的，
+    ///   那么action.NetworkAverage = confirmedActions.GetPriorTime();
+    ///   否则action.NetworkAverage = initialLockStepTurnLength（初始化的lockstep的时长，这是200毫秒）;
+    /// 4.计算action.RuntimeAverage
+    ///   action.RuntimeAverage = Convert.ToInt32(currentGameFrameRuntime);
+    /// </summary>
 	private void SendPendingAction() {
 		Action action = null;
 		if(actionsToSend.Count > 0) 
